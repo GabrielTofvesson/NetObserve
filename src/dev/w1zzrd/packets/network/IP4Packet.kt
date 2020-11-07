@@ -1,17 +1,17 @@
-package dev.w1zzrd.packets.transport
+package dev.w1zzrd.packets.network
 
 import dev.w1zzrd.packets.Packet
-import dev.w1zzrd.packets.transport.DSCPType.Companion.getDSCPType
-import dev.w1zzrd.packets.transport.DatagramProtocol.Companion.toDatagramProtocol
-import dev.w1zzrd.packets.transport.IP4OptionType.Companion.toIP4OptionType
+import dev.w1zzrd.packets.network.DSCPType.Companion.getDSCPType
+import dev.w1zzrd.packets.network.DatagramProtocol.Companion.toDatagramProtocol
+import dev.w1zzrd.packets.network.IP4OptionType.Companion.toIP4OptionType
 import java.nio.ByteOrder
 import kotlin.experimental.and
 import kotlin.reflect.full.functions
 
 inline fun <reified T> UInt.toEnum(): T where T: Enum<T> {
-    val values = (T::class.functions.first { it.name == "values" }.call() as Array<T>)
+    val values = (T::class.functions.first { it.name == "values" }.call() as Array<*>)
 
-    if (this < values.size.toUInt()) return values[this.toInt()]
+    if (this < values.size.toUInt()) return values[this.toInt()] as T
     else throw IllegalArgumentException("Index out of bounds")
 }
 
@@ -95,7 +95,8 @@ class IP4Packet: Packet {
     }
 
     // IPv4 options field parser
-    inner class IP4Options(private var optionIndices: UIntArray = UIntArray(0)): Collection<UInt> by optionIndices {
+    inner class IP4Options: Collection<UInt> {
+        private val optionIndices: UIntArray
         init {
             if (headerLength == 20u) optionIndices = UIntArray(0)
             else {
@@ -123,6 +124,13 @@ class IP4Packet: Packet {
 
             return IP4Option(optionIndices[index])
         }
+
+        // Stupid delegation stuff
+        override val size by optionIndices::size
+        override fun contains(element: UInt) = optionIndices.contains(element)
+        override fun containsAll(elements: Collection<UInt>) = optionIndices.containsAll(elements)
+        override fun isEmpty() = optionIndices.isEmpty()
+        override fun iterator() = optionIndices.iterator()
     }
 
     // IPv4 option field

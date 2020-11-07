@@ -3,7 +3,7 @@ package dev.w1zzrd.packets.link
 import dev.w1zzrd.packets.Packet
 import java.nio.ByteOrder
 
-class EthernetPacket: Packet {
+class MACPacket: Packet {
     constructor(
             data: ByteArray,
             offset: UInt,

@@ -1,4 +1,4 @@
-package dev.w1zzrd.packets.transport
+package dev.w1zzrd.packets.network
 
 enum class DatagramProtocol {
     HOPOPT,
